@@ -1,0 +1,17 @@
+{
+  "name": "test-project",
+  "version": "1.0.0",
+  "description": "Test project for DepSensei",
+  "dependencies": {
+    "request": "2.88.0",
+    "express": "4.16.4",
+    "lodash": "4.17.15"
+  },
+  "devDependencies": {
+    "mocha": "6.2.2",
+    "chai": "5.2.0"
+  },
+  "peerDependencies": {
+    "react": "19.1.0"
+  }
+}
