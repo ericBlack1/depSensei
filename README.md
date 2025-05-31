@@ -121,8 +121,8 @@ depsensei --version
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/depsensei.git
-cd depsensei
+git clone https://github.com/ericBlack1/depSensei.git
+cd depSensei
 ```
 
 2. Install dependencies:

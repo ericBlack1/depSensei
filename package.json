@@ -6,6 +6,11 @@
   "bin": {
     "depsensei": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
@@ -13,7 +18,9 @@
     "test": "jest",
     "test:workflow": "ts-node test/workflow.test.ts",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build && npm test",
+    "prepare": "npm run build"
   },
   "keywords": [
     "dependencies",
@@ -21,10 +28,23 @@
     "javascript",
     "npm",
     "yarn",
-    "package-manager"
+    "package-manager",
+    "cli",
+    "dev-tools"
   ],
-  "author": "",
+  "author": "Angelo <ericangeloawa@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericBlack1/depSensei"
+  },
+  "bugs": {
+    "url": "https://github.com/ericBlack1/depSensei/issues"
+  },
+  "homepage": "https://github.com/ericBlack1/depSensei#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.3",
