@@ -4,11 +4,11 @@
   "description": "Test project for DepSensei",
   "dependencies": {
     "request": "2.88.0",
-    "express": "4.16.4",
-    "lodash": "4.17.15"
+    "express": "5.1.0",
+    "lodash": "4.17.21"
   },
   "devDependencies": {
-    "mocha": "6.2.2",
+    "mocha": "11.5.0",
     "chai": "5.2.0"
   },
   "peerDependencies": {

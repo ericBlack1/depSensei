@@ -1,10 +1,10 @@
 {
   "name": "depsensei",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "A CLI tool to detect and resolve dependency issues across various programming environments",
   "main": "dist/index.js",
   "bin": {
-    "depsensei": "./dist/index.js"
+    "depsensei": "./dist/cli/index.js"
   },
   "files": [
     "dist",

@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { PluginManager } from '../utils/plugin.manager';
 import { JavaScriptAnalyzer } from '../analyzers/javascript/javascript.analyzer';
 import { SandboxManager } from '../sandbox/sandbox.manager';
+import { ApplyCommand } from '../commands/apply.command';
 
 const program = new Command();
 const pluginManager = new PluginManager();
@@ -49,7 +50,7 @@ program
             console.log(`   - ${dep.name}@${dep.version}`);
           });
           
-          if (issue.suggestedFixes.length > 0) {
+          if (issue.suggestedFixes && issue.suggestedFixes.length > 0) {
             console.log('   Suggested fixes:');
             issue.suggestedFixes.forEach(fix => {
               console.log(`   - ${fix.description}`);
@@ -74,19 +75,33 @@ program
   .option('-e, --ecosystem <ecosystem>', 'Specific ecosystem to fix')
   .option('-d, --dry-run', 'Show what would be fixed without making changes')
   .option('-i, --interactive', 'Prompt before applying each fix')
+  .option('--no-backup', 'Skip creating a backup of package.json')
+  .option('--no-install', 'Skip running npm install after applying fixes')
+  .option('--force', 'Skip confirmation prompt')
   .action(async (options) => {
     console.log(chalk.blue('🔧 Applying fixes...'));
-    
-    const sandbox = new SandboxManager({ projectRoot: options.path });
-    await sandbox.create();
 
-    try {
-      // Implementation for applying fixes
-      // This would use the plugin manager to get appropriate fixers
-      // and apply them in the sandbox first
-    } finally {
-      await sandbox.cleanup();
+    // Analyze the project
+    const analyzer = new JavaScriptAnalyzer();
+    const isDetected = await analyzer.detect({ projectRoot: options.path });
+    if (!isDetected) {
+      console.log(chalk.red('No valid package.json found in the project root.'));
+      return;
     }
+    const result = await analyzer.analyze({ projectRoot: options.path });
+
+    if (result.issues.length === 0) {
+      console.log(chalk.green('✨ No issues found!'));
+      return;
+    }
+
+    // Apply fixes
+    const applyCommand = new ApplyCommand(result.issues, options.path);
+    await applyCommand.execute({
+      force: !!options.force,
+      noBackup: !!options.noBackup,
+      noInstall: !!options.noInstall,
+    });
   });
 
 program.parse(); 

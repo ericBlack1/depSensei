@@ -91,14 +91,18 @@ export class JavaScriptAnalyzer implements Analyzer {
             const packageInfo = await this.getPackageInfo(name);
             const latestVersion = packageInfo['dist-tags'].latest;
             const currentVersion = version as string;
+            const cleanCurrent = semver.minVersion(currentVersion);
+            const cleanLatest = semver.minVersion(latestVersion);
             
             // Only mark as outdated if the latest version is greater than current
-            if (latestVersion && semver.gt(latestVersion, currentVersion)) {
+            if (cleanLatest && cleanCurrent && semver.gt(cleanLatest.version, cleanCurrent.version)) {
               dependencies.push({
                 name,
                 version: currentVersion,
                 type: depType,
               });
+            } else if (!cleanLatest || !cleanCurrent) {
+              console.error(`Could not parse version for ${name}: current='${currentVersion}', latest='${latestVersion}'`);
             }
           } catch (error) {
             console.error(`Error checking ${name}:`, error);
@@ -209,8 +213,11 @@ export class JavaScriptAnalyzer implements Analyzer {
       try {
         const packageInfo = await this.getPackageInfo(dep.name);
         const latestVersion = packageInfo['dist-tags'].latest;
+        const currentVersion = dep.version as string;
+        const cleanCurrent = semver.minVersion(currentVersion);
+        const cleanLatest = semver.minVersion(latestVersion);
         
-        if (latestVersion && semver.gt(latestVersion, dep.version)) {
+        if (cleanLatest && cleanCurrent && semver.gt(cleanLatest.version, cleanCurrent.version)) {
           issues.push({
             type: 'outdated',
             message: `Package ${dep.name} is outdated (current: ${dep.version}, latest: ${latestVersion})`,
@@ -226,6 +233,8 @@ export class JavaScriptAnalyzer implements Analyzer {
               confidence: 'high',
             }],
           });
+        } else if (!cleanLatest || !cleanCurrent) {
+          console.error(`Could not parse version for ${dep.name}: current='${dep.version}', latest='${latestVersion}'`);
         }
       } catch (error) {
         console.error(`Error getting package info for ${dep.name}:`, error);
@@ -238,7 +247,7 @@ export class JavaScriptAnalyzer implements Analyzer {
         });
       }
     }
-    
+     
     return issues;
   }
 

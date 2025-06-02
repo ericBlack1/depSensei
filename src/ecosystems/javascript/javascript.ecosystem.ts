@@ -26,32 +26,38 @@ export class JavaScriptEcosystem implements Ecosystem {
     const issues: DependencyIssue[] = [];
     const dependencies = this.getAllDependencies();
 
-    // Check for deprecated packages
-    const ncuResult = await ncu.run({
-      packageFile: this.packageJsonPath,
-      jsonUpgraded: true,
-      silent: true,
-    });
+    try {
+      // Check for deprecated packages
+      const ncuResult = await ncu({
+        packageFile: this.packageJsonPath,
+        jsonUpgraded: true,
+        silent: true,
+      });
 
-    for (const [name, version] of Object.entries(ncuResult)) {
-      const dep = dependencies.find(d => d.name === name);
-      if (dep) {
-        issues.push({
-          type: 'deprecated',
-          severity: 'medium',
-          message: `Package ${name} has a newer version available`,
-          affectedDependencies: [dep],
-          suggestedFixes: [{
-            description: `Update ${name} to version ${version}`,
-            changes: [{
-              name,
-              from: dep.version,
-              to: version as string,
-            }],
-            confidence: 'high',
-          }],
-        });
+      if (ncuResult && typeof ncuResult === 'object') {
+        for (const [name, version] of Object.entries(ncuResult)) {
+          const dep = dependencies.find(d => d.name === name);
+          if (dep) {
+            issues.push({
+              type: 'deprecated',
+              severity: 'medium',
+              message: `Package ${name} has a newer version available`,
+              affectedDependencies: [dep],
+              suggestedFixes: [{
+                description: `Update ${name} to version ${version}`,
+                changes: [{
+                  name,
+                  from: dep.version,
+                  to: String(version),
+                }],
+                confidence: 'high',
+              }],
+            });
+          }
+        }
       }
+    } catch (error) {
+      console.error('Error checking for updates:', error);
     }
 
     // Check for version conflicts
@@ -73,8 +79,8 @@ export class JavaScriptEcosystem implements Ecosystem {
   }
 
   async resolve(issue: DependencyIssue): Promise<DependencyFix[]> {
-    // For now, return the suggested fixes
-    return issue.suggestedFixes;
+    // Ensure we always return an array, even if suggestedFixes is undefined
+    return issue.suggestedFixes || [];
   }
 
   async applyFix(fix: DependencyFix): Promise<void> {
